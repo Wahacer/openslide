@@ -1,4 +1,16 @@
 {
-  "folders": [],
-  "assignments": {}
+  "folders": [
+    {
+      "id": "f-16ec86a8",
+      "name": "hihi",
+      "icon": {
+        "type": "color",
+        "value": "#c0392b"
+      }
+    }
+  ],
+  "assignments": {
+    "binhai-digital-culture": "f-16ec86a8",
+    "zhiyun-health": "f-16ec86a8"
+  }
 }
