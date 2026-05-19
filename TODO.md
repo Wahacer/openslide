@@ -4,6 +4,16 @@
 
 将 open-slide 从本地开发者工具改造为多租户 SaaS 产品，支持用户登录、计费、Chat 式 AI 编辑、管理后台等功能。
 
+## 现有代码资产（可复用）
+
+| 模块 | 位置 | 可复用于 |
+|------|------|----------|
+| AST 编辑引擎 | `packages/core/src/editing/edit-ops.ts` (1200+ 行) | Phase 3 — LLM 输出结构化 EditOp 指令即可驱动修改 |
+| Comment 系统 | `packages/core/src/editing/comments.ts` + `vite/routes/comments.ts` | Phase 5 — 核心逻辑不变，CLI 调用换 API 调用 |
+| 资产 CRUD | `packages/core/src/vite/routes/assets.ts` | Phase 4 — 存储后端从文件系统换 S3 |
+| 图片裁剪 | `react-image-crop` + `inspector/image-crop-dialog.tsx` | Phase 4 — 扩展为完整图片编辑器 |
+| Inspector UI | `packages/core/src/app/components/inspector/` | Phase 5 — 添加 Apply 按钮 |
+
 ---
 
 ## Phase 0 — 基础设施搭建（预计 2-3 周）
@@ -47,9 +57,12 @@
 - [ ] AI Service Layer 抽象（支持多模型切换）
   - [ ] Claude API Provider
   - [ ] OpenAI API Provider（可选）
-  - [ ] 图片生成 Provider（DALL-E / Flux）
-- [ ] Slide 源码作为 context 传入 LLM
-- [ ] LLM 输出 → AST 编辑 → 源码更新 pipeline
+  - [ ] 图片生成 Provider（DALL-E / Flux / GPT-Image）
+- [ ] 复用现有 EditOp 体系（LLM 输出结构化指令，非原始代码）
+  - [ ] set-style / set-text / set-attr-asset / replace-placeholder-with-image
+  - [ ] 新增：insert-page / delete-page / reorder-page 指令
+- [ ] Slide 源码 + 资产列表作为 context 传入 LLM
+- [ ] LLM 输出 → EditOp 解析 → AST 编辑 → 源码更新 pipeline
 - [ ] 对话历史持久化（支持多轮修改）
 - [ ] 前端 Chat 面板 UI（右侧抽屉/面板）
 - [ ] 流式返回 + 实时预览
@@ -58,8 +71,9 @@
 
 ---
 
-## Phase 4 — 前端文件上传 & 资产管理（预计 1 周）
+## Phase 4 — 前端文件上传 & 图片能力（预计 2 周）
 
+### 上传基础
 - [ ] 预签名 URL 上传接口（直传 S3/R2）
 - [ ] 前端拖拽上传组件（Chat 面板 + Slide 编辑器）
 - [ ] 粘贴图片自动上传
@@ -67,17 +81,32 @@
 - [ ] 资产浏览器 UI（查看/删除/替换已上传资产）
 - [ ] 文件大小 & 类型校验
 
+### AI 图片生成
+- [ ] Chat 中通过指令生成图片（"帮我生成一张…"）
+- [ ] 支持 GPT-Image / DALL-E / Flux 等多 Provider
+- [ ] 生成结果预览 → 确认后插入 slide
+- [ ] 生成次数计量（对接 Phase 2 IMAGE_GEN 额度）
+
+### 图片编辑器（基于现有 react-image-crop 扩展）
+- [ ] 裁剪（已有基础，扩展交互）
+- [ ] 旋转（90° 步进 + 自由角度）
+- [ ] 缩放 & 平移预览
+- [ ] 确认后替换原图 / 另存为新资产
+- [ ] 编辑器内直接插入到 slide 指定位置
+
 ---
 
 ## Phase 5 — 前台评论应用（预计 1 周）
 
-- [ ] 评论面板添加「应用所有修改」按钮
+- [ ] 评论面板添加「应用所有修改」按钮（复用现有 CommentWidget）
 - [ ] 单条评论「Apply」按钮（只应用该条修改）
 - [ ] `POST /api/slides/:id/apply-comments` 接口
-- [ ] 后端收集 @slide-comment → 组装 prompt → LLM 生成修改
+- [ ] 后端收集 @slide-comment → 组装 prompt → LLM 输出 EditOp 指令
+- [ ] 复用 `edit-ops.ts` 的 `applyEdit()` 执行修改
 - [ ] 修改结果通过 WebSocket 推送前端
 - [ ] Slide 实时热更新（无需手动刷新）
 - [ ] 应用成功后自动清除对应 comment 标记
+- [ ] 应用失败时保留 comment 并显示错误原因
 
 ---
 
@@ -93,13 +122,25 @@
 
 ---
 
-## Phase 7 — 导出优化（预计 1-2 周）
+## Phase 7 — 导出优化（预计 2-3 周）
 
-- [ ] PPTX 导出（pptxgenjs：文本可编辑、图片嵌入、布局还原）
-- [ ] PDF 导出升级（Puppeteer 服务端渲染，高分辨率）
-- [ ] HTML 导出增强（保留 CSS 动画）
+### PPTX 导出（混合策略）
+- [ ] 结构化元素转换（文本 → TextBox，图片 → Image，表格 → Table）
+- [ ] 复杂元素降级（CSS 动画/blur/SVG → 截图嵌入）
+- [ ] 布局映射（React flex 计算绝对坐标 → PPTX position）
+- [ ] 字体/颜色/大小还原
+- [ ] 多页 slide → 多页 PPTX
+- [ ] 导出前预览（标记哪些元素会降级为图片）
+
+### PDF 导出升级
+- [ ] 服务端 Puppeteer 渲染（替代 window.print()）
+- [ ] 高分辨率输出（2x DPI）
+- [ ] 自定义页面尺寸支持
+
+### 通用
 - [ ] 导出任务队列（大文件异步处理）
 - [ ] 导出历史记录 & 下载管理
+- [ ] HTML 导出增强（保留 CSS 动画）
 
 ---
 
@@ -110,12 +151,12 @@
 
 Phase 0 (基础设施)     ████████░░  2-3 周
 Phase 1 (认证+隔离)    ██████░░░░  1-2 周
-Phase 4 (文件上传)     ████░░░░░░  1 周
+Phase 4 (上传+图片)    ██████░░░░  2 周
 Phase 5 (前台评论)     ████░░░░░░  1 周
 Phase 3 (Chat 编辑)    ████████████ 3-4 周  ← 核心功能
 Phase 2 (计费系统)     ██████░░░░  1-2 周
 Phase 6 (管理后台)     ██████████  2-3 周
-Phase 7 (导出优化)     ██████░░░░  1-2 周
+Phase 7 (导出优化)     ████████░░  2-3 周
 ```
 
 ---
@@ -133,5 +174,6 @@ Phase 7 (导出优化)     ██████░░░░  1-2 周
 | 实时通信 | WebSocket / SSE |
 | UI 组件 | shadcn/ui（项目已有） |
 | 图表 | Recharts |
-| PPTX 导出 | pptxgenjs |
+| 图片编辑 | react-image-crop（已有）+ 自研旋转/缩放 |
+| PPTX 导出 | pptxgenjs（混合策略：结构化 + 截图降级） |
 | PDF 导出 | Puppeteer（服务端） |
