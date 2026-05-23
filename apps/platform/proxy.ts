@@ -2,9 +2,14 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
 const publicPaths = ['/login', '/register', '/api/auth'];
+const ignoredPrefixes = ['/_next', '/favicon.ico'];
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (ignoredPrefixes.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
 
   if (publicPaths.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
