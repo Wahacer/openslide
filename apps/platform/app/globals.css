@@ -1,1 +1,23 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+
+@source "./app/**/*.{ts,tsx}";
+@source "./lib/**/*.{ts,tsx}";
+@source "./auth.ts";
+@source "./proxy.ts";
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Menlo", "Cascadia Code", monospace;
+
+  --color-background: oklch(0.985 0.004 75);
+  --color-foreground: oklch(0.2 0.012 60);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.2 0.012 60);
+  --color-muted: oklch(0.955 0.008 75);
+  --color-muted-foreground: oklch(0.485 0.012 60);
+  --color-border: oklch(0.895 0.008 70);
+  --color-input: oklch(0.91 0.008 70);
+  --color-ring: oklch(0.555 0.185 28);
+  --color-brand: oklch(0.555 0.185 28);
+  --color-brand-foreground: oklch(0.985 0.004 75);
+}
