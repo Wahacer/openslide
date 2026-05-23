@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "core": "pnpm --filter @open-slide/core",
     "cli": "pnpm --filter @open-slide/cli",
+    "platform": "pnpm --filter platform",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo run build --filter=@open-slide/core --filter=@open-slide/cli && changeset publish"
@@ -29,5 +30,13 @@
     "@changesets/cli": "^2.31.0",
     "turbo": "^2.3.0",
     "vitest": "^2.1.9"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "prisma",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild"
+    ]
   }
 }
