@@ -18,23 +18,23 @@
 
 ## Phase 0 — 基础设施搭建（预计 2-3 周）
 
-- [ ] 新建 `apps/platform/` 目录（Next.js App Router）
-- [ ] 配置 PostgreSQL + Prisma ORM
-- [ ] 配置对象存储（S3 / Cloudflare R2）
-- [ ] 配置 Redis（会话管理、速率限制）
-- [ ] 部署流水线搭建（Vercel + Railway/Fly.io）
-- [ ] 环境变量 & secrets 管理方案
+- [x] 新建 `apps/platform/` 目录（Next.js App Router）
+- [x] 配置 PostgreSQL + Prisma ORM
+- [x] 配置对象存储（S3 / Cloudflare R2）
+- [ ] 配置 Redis（会话管理、速率限制）— 延后，上线前补
+- [ ] 部署流水线搭建 — 延后，上线前补
+- [x] 环境变量 & secrets 管理方案
 
 ---
 
 ## Phase 1 — 用户认证 & 多租户隔离（预计 1-2 周）
 
-- [ ] 用户注册/登录（邮箱+密码）
-- [ ] OAuth 登录（GitHub / Google）
-- [ ] JWT/Session 认证中间件
-- [ ] 用户数据模型（User, Slide, Asset）
-- [ ] 多租户数据隔离（每个用户只能访问自己的 slides）
-- [ ] Storage Adapter 接口抽象（FileSystem / S3）
+- [x] 用户注册/登录（邮箱+密码）
+- [x] OAuth 登录（GitHub / Google）— 代码就绪，填 env 即可启用
+- [x] JWT/Session 认证中间件
+- [x] 用户数据模型（User, Slide, Asset）
+- [x] 多租户数据隔离（每个用户只能访问自己的 slides）
+- [x] Storage Adapter 接口抽象（FileSystem / S3）
 
 ---
 
