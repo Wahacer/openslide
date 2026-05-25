@@ -40,14 +40,14 @@
 
 ## Phase 2 — 计费系统（预计 1-2 周）
 
-- [ ] Account 数据模型设计（关联 User）
-- [ ] 通用额度体系（QuotaType 枚举：TOKEN / IMAGE_GEN / CREDIT / SLIDE_COUNT / STORAGE_BYTES）
-- [ ] Quota 表：每用户每类型的额度上限 & 已用量
-- [ ] UsageLog 流水表（审计 + 明细，记录 model、slideId、action 等 meta）
-- [ ] QuotaService 核心接口（check / consume / getUsage / reset）
-- [ ] 额度重置机制（月度自动重置）
-- [ ] 超额拦截中间件（API 层统一校验）
-- [ ] 充值/套餐升级接口（对接支付或手动充值）
+- [x] Account 数据模型设计（关联 User）
+- [x] 通用额度体系（QuotaType 枚举：TOKEN / IMAGE_GEN / CREDIT / SLIDE_COUNT / STORAGE_BYTES）
+- [x] Quota 表：每用户每类型的额度上限 & 已用量
+- [x] UsageLog 流水表（审计 + 明细，记录 model、slideId、action 等 meta）
+- [x] QuotaService 核心接口（check / consume / getUsage / reset）
+- [ ] 额度重置机制（月度自动重置）— 需要 cron job，延后到部署阶段
+- [x] 超额拦截中间件（API 层统一校验）— withQuota 高阶函数
+- [ ] 充值/套餐升级接口（对接支付或手动充值）— 延后到有支付需求时
 
 ---
 
