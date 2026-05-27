@@ -36,6 +36,7 @@ model User {
   quotas        Quota[]
   usageLogs     UsageLog[]
   conversations Conversation[]
+  exportJobs    ExportJob[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 }
@@ -160,4 +161,28 @@ model Message {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId])
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model ExportJob {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slideId   String
+  format    String
+  status    ExportStatus @default(PENDING)
+  fileUrl   String?
+  fileSize  Int?
+  error     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

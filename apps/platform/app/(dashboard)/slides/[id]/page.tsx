@@ -1,8 +1,9 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChatPanel } from '../../../components/chat-panel';
+import { useEditHistory } from '../../../hooks/use-edit-history';
 
 type SlideDetail = {
   id: string;
@@ -34,6 +35,18 @@ export default function SlideDetailPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+
+  const [exportingFormat, setExportingFormat] = useState<string | null>(null);
+
+  const handleSourceChange = useCallback((source: string) => {
+    setSlide((prev) => (prev ? { ...prev, source } : null));
+  }, []);
+
+  const editHistory = useEditHistory({
+    slideId: id,
+    initialSource: slide?.source ?? '',
+    onSourceChange: handleSourceChange,
+  });
 
   useEffect(() => {
     fetch(`/api/slides/${id}`)
@@ -72,19 +85,50 @@ export default function SlideDetailPage() {
   }
 
   async function handleExport(format: 'pptx' | 'html') {
-    const res = await fetch('/api/export', {
+    setExportingFormat(format);
+    const res = await fetch('/api/export-jobs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ slideId: id, format }),
     });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${slide?.slug || 'slide'}.${format}`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!res.ok) {
+      setExportingFormat(null);
+      return;
+    }
+    const { jobId } = await res.json();
+    pollExportJob(jobId, format);
+  }
+
+  async function pollExportJob(jobId: string, format: string) {
+    const poll = async () => {
+      const res = await fetch(`/api/export-jobs/${jobId}`);
+      if (!res.ok) {
+        setExportingFormat(null);
+        return;
+      }
+      const job = await res.json();
+      if (job.status === 'COMPLETED' && job.fileUrl) {
+        const byteString = atob(job.fileUrl.split(',')[1]);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab]);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${slide?.slug || 'slide'}.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setExportingFormat(null);
+      } else if (job.status === 'FAILED') {
+        setExportingFormat(null);
+      } else {
+        setTimeout(poll, 1500);
+      }
+    };
+    poll();
   }
 
   if (loading) {
@@ -143,17 +187,37 @@ export default function SlideDetailPage() {
         </button>
         <button
           type="button"
-          onClick={() => handleExport('pptx')}
-          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+          onClick={editHistory.undo}
+          disabled={!editHistory.canUndo}
+          className="rounded-md border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-30"
+          title="撤销"
         >
-          导出 PPTX
+          ↩ 撤销
+        </button>
+        <button
+          type="button"
+          onClick={editHistory.redo}
+          disabled={!editHistory.canRedo}
+          className="rounded-md border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-30"
+          title="重做"
+        >
+          ↪ 重做
+        </button>
+        <button
+          type="button"
+          onClick={() => handleExport('pptx')}
+          disabled={exportingFormat !== null}
+          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50"
+        >
+          {exportingFormat === 'pptx' ? '导出中…' : '导出 PPTX'}
         </button>
         <button
           type="button"
           onClick={() => handleExport('html')}
-          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+          disabled={exportingFormat !== null}
+          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50"
         >
-          导出 HTML
+          {exportingFormat === 'html' ? '导出中…' : '导出 HTML'}
         </button>
       </div>
 
@@ -227,6 +291,18 @@ export default function SlideDetailPage() {
               fetch(`/api/conversations?slideId=${id}`)
                 .then((res) => (res.ok ? res.json() : []))
                 .then(setConversations);
+            }}
+            onEditOpsApplied={(event) => {
+              const sourceBefore =
+                typeof slide.source === 'string' ? slide.source : JSON.stringify(slide.source);
+              editHistory.pushOperation({
+                id: `op_${Date.now()}`,
+                timestamp: Date.now(),
+                ops: event.ops,
+                description: event.description,
+                sourceBefore,
+                sourceAfter: event.source,
+              });
             }}
           />
         </div>

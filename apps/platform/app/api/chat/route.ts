@@ -2,11 +2,37 @@ import { auth } from '@/auth';
 import type { ChatMessage } from '@/lib/ai';
 import { getAIProvider } from '@/lib/ai';
 import { db } from '@/lib/db';
+import type { EditOp } from '@/lib/edit-ops';
+import { applyEditOps } from '@/lib/edit-ops';
 import { checkQuota, consumeQuota } from '@/lib/quota';
 
 const SLIDE_SYSTEM_PROMPT = `You are open-slide's AI editing assistant. You help users create and modify presentation slides written in React JSX/TSX.
 
-When the user asks to modify a slide, output ONLY the modified source code (no markdown fences, no explanations). When they ask questions, answer conversationally.
+When the user asks to modify a slide, respond with a JSON block containing structured edit operations. Format:
+
+\`\`\`editops
+{
+  "description": "简短描述修改内容",
+  "ops": [
+    { "type": "set-style", "selector": "css-class-or-id", "property": "css-property", "value": "new-value" },
+    { "type": "set-text", "selector": "css-class-or-id", "text": "new text content" },
+    { "type": "insert-element", "parentSelector": "parent-class-or-id", "position": "last-child", "jsx": "<div>new element</div>" },
+    { "type": "delete-element", "selector": "css-class-or-id" },
+    { "type": "replace-source", "source": "complete new source code" }
+  ]
+}
+\`\`\`
+
+Rules for edit operations:
+- Use "set-style" for style changes (use CSS property names like "color", "font-size")
+- Use "set-text" for text content changes
+- Use "insert-element" to add new elements (position: before/after/first-child/last-child)
+- Use "delete-element" to remove elements
+- Use "replace-source" ONLY when changes are too complex for granular ops
+- Selectors match against className, id, or data-id attributes
+- Prefer granular ops over replace-source for undo/redo support
+
+When the user asks questions (not modifications), answer conversationally in Chinese without editops blocks.
 
 Slide capabilities:
 - Each slide is a React component rendering on a 1920×1080 canvas
@@ -18,9 +44,21 @@ Slide capabilities:
 
 Rules:
 - Keep responses concise
-- When modifying code, return the complete modified file
-- Preserve existing imports and structure unless asked to change them
 - Use Chinese for conversational responses`;
+
+function parseEditOpsFromResponse(response: string): { ops: EditOp[]; description: string } | null {
+  const match = response.match(/```editops\s*\n([\s\S]*?)\n```/);
+  if (!match) return null;
+  try {
+    const parsed = JSON.parse(match[1]);
+    if (parsed.ops && Array.isArray(parsed.ops)) {
+      return { ops: parsed.ops as EditOp[], description: parsed.description ?? '' };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -134,6 +172,28 @@ export async function POST(request: Request) {
               conversationId: conversation.id,
               model: process.env.AI_MODEL ?? 'unknown',
             });
+
+            const editOps = parseEditOpsFromResponse(fullResponse);
+            if (editOps && targetSlideId) {
+              const slide = await db.slide.findFirst({
+                where: { id: targetSlideId, userId },
+              });
+              if (slide) {
+                const src =
+                  typeof slide.source === 'string' ? slide.source : JSON.stringify(slide.source);
+                const newSource = applyEditOps(src, editOps.ops);
+                await db.slide.update({
+                  where: { id: targetSlideId },
+                  data: { source: newSource },
+                });
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'editops', ops: editOps.ops, description: editOps.description, source: newSource })}\n\n`,
+                  ),
+                );
+              }
+            }
+
             controller.enqueue(
               encoder.encode(
                 `data: ${JSON.stringify({ type: 'done', conversationId: conversation.id })}\n\n`,
