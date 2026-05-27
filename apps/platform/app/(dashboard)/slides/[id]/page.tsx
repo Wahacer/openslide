@@ -71,6 +71,22 @@ export default function SlideDetailPage() {
     }
   }
 
+  async function handleExport(format: 'pptx' | 'html') {
+    const res = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slideId: id, format }),
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${slide?.slug || 'slide'}.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (loading) {
     return <div className="py-12 text-center text-sm text-neutral-400">加载中…</div>;
   }
@@ -124,6 +140,20 @@ export default function SlideDetailPage() {
           className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
         >
           {chatOpen ? '关闭对话' : 'AI 对话编辑'}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleExport('pptx')}
+          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          导出 PPTX
+        </button>
+        <button
+          type="button"
+          onClick={() => handleExport('html')}
+          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          导出 HTML
         </button>
       </div>
 
