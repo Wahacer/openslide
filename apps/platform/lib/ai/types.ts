@@ -18,10 +18,7 @@ export type StreamChunk = {
 export interface AIProvider {
   id: string;
   chat(messages: ChatMessage[], options?: ChatCompletionOptions): Promise<string>;
-  stream(
-    messages: ChatMessage[],
-    options?: ChatCompletionOptions,
-  ): AsyncIterable<StreamChunk>;
+  stream(messages: ChatMessage[], options?: ChatCompletionOptions): AsyncIterable<StreamChunk>;
 }
 
 export type AIConfig = {

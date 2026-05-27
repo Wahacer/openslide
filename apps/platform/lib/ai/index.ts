@@ -1,8 +1,14 @@
-import type { AIConfig, AIProvider } from './types';
-import { OpenAIProvider } from './openai';
 import { AnthropicProvider } from './anthropic';
+import { OpenAIProvider } from './openai';
+import type { AIConfig, AIProvider } from './types';
 
-export type { AIProvider, ChatMessage, ChatCompletionOptions, StreamChunk, AIConfig } from './types';
+export type {
+  AIConfig,
+  AIProvider,
+  ChatCompletionOptions,
+  ChatMessage,
+  StreamChunk,
+} from './types';
 
 let _provider: AIProvider | null = null;
 

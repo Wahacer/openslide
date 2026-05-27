@@ -85,11 +85,7 @@ export class OpenAIProvider implements AIProvider {
     yield { type: 'done', content: '' };
   }
 
-  private buildBody(
-    messages: ChatMessage[],
-    options?: ChatCompletionOptions,
-    stream = false,
-  ) {
+  private buildBody(messages: ChatMessage[], options?: ChatCompletionOptions, stream = false) {
     const model = options?.model ?? this.defaultModel;
     const allMessages = options?.systemPrompt
       ? [{ role: 'system' as const, content: options.systemPrompt }, ...messages]
