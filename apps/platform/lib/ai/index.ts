@@ -1,7 +1,9 @@
 import { AnthropicProvider } from './anthropic';
+import { OpenAIImageProvider } from './image';
 import { OpenAIProvider } from './openai';
 import type { AIConfig, AIProvider } from './types';
 
+export type { ImageGenerationOptions, ImageGenerationResult, ImageProvider } from './image';
 export type {
   AIConfig,
   AIProvider,
@@ -11,6 +13,7 @@ export type {
 } from './types';
 
 let _provider: AIProvider | null = null;
+let _imageProvider: OpenAIImageProvider | null = null;
 
 export function getAIProvider(): AIProvider {
   if (_provider) return _provider;
@@ -33,6 +36,23 @@ export function getAIProvider(): AIProvider {
   return _provider;
 }
 
+export function getImageProvider(): OpenAIImageProvider {
+  if (_imageProvider) return _imageProvider;
+
+  const apiKey = process.env.IMAGE_API_KEY || process.env.AI_API_KEY;
+  if (!apiKey) {
+    throw new Error('IMAGE_API_KEY or AI_API_KEY environment variable is required');
+  }
+
+  _imageProvider = new OpenAIImageProvider({
+    apiKey,
+    baseUrl: process.env.IMAGE_API_BASE_URL || process.env.AI_BASE_URL || undefined,
+    model: process.env.IMAGE_MODEL || 'gpt-image-1',
+  });
+
+  return _imageProvider;
+}
+
 export function createProvider(config: AIConfig): AIProvider {
   switch (config.provider) {
     case 'anthropic':
@@ -41,7 +61,6 @@ export function createProvider(config: AIConfig): AIProvider {
         baseUrl: config.baseUrl,
         defaultModel: config.defaultModel,
       });
-    case 'openai':
     default:
       return new OpenAIProvider({
         apiKey: config.apiKey,
