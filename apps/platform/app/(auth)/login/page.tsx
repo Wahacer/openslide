@@ -20,15 +20,14 @@ function LoginForm() {
     const result = await signIn('credentials', {
       email,
       password,
-      callbackUrl,
       redirect: false,
     });
 
     if (result?.error) {
       setError('邮箱或密码错误');
       setLoading(false);
-    } else if (result?.url) {
-      window.location.href = result.url;
+    } else {
+      window.location.href = callbackUrl === '/' ? '/slides' : callbackUrl;
     }
   };
 
