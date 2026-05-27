@@ -19,6 +19,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <a href="/admin/users" className="block rounded-md px-3 py-2 hover:bg-neutral-800">
             用户管理
           </a>
+          <a href="/admin/logs" className="block rounded-md px-3 py-2 hover:bg-neutral-800">
+            操作日志
+          </a>
           <a href="/admin/billing" className="block rounded-md px-3 py-2 hover:bg-neutral-800">
             计费设置
           </a>
