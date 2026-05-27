@@ -98,15 +98,15 @@
 
 ## Phase 5 — 前台评论应用（预计 1 周）
 
-- [ ] 评论面板添加「应用所有修改」按钮（复用现有 CommentWidget）
+- [x] 评论面板添加「应用所有修改」按钮（复用现有 CommentWidget）
 - [ ] 单条评论「Apply」按钮（只应用该条修改）
-- [ ] `POST /api/slides/:id/apply-comments` 接口
-- [ ] 后端收集 @slide-comment → 组装 prompt → LLM 输出 EditOp 指令
-- [ ] 复用 `edit-ops.ts` 的 `applyEdit()` 执行修改
+- [x] `POST /api/slides/:id/apply-comments` 接口
+- [x] 后端收集 @slide-comment → 组装 prompt → LLM 输出 EditOp 指令
+- [x] 复用 `edit-ops.ts` 的 `applyEdit()` 执行修改
 - [ ] 修改结果通过 WebSocket 推送前端
 - [ ] Slide 实时热更新（无需手动刷新）
-- [ ] 应用成功后自动清除对应 comment 标记
-- [ ] 应用失败时保留 comment 并显示错误原因
+- [x] 应用成功后自动清除对应 comment 标记
+- [x] 应用失败时保留 comment 并显示错误原因
 
 ---
 
