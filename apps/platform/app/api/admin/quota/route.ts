@@ -1,8 +1,8 @@
+import type { QuotaType } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { setQuotaLimit, resetQuota } from '@/lib/quota';
 import { db } from '@/lib/db';
-import type { QuotaType } from '@prisma/client';
+import { resetQuota, setQuotaLimit } from '@/lib/quota';
 
 const VALID_TYPES: QuotaType[] = ['TOKEN', 'IMAGE_GEN', 'CREDIT', 'SLIDE_COUNT', 'STORAGE_BYTES'];
 

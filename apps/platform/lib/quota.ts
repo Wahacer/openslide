@@ -1,5 +1,5 @@
+import type { Prisma, QuotaType } from '@prisma/client';
 import { db } from './db';
-import type { QuotaType } from '@prisma/client';
 
 export type QuotaCheckResult =
   | { allowed: true; remaining: bigint }
@@ -71,7 +71,7 @@ export async function consumeQuota(
         userId,
         type,
         amount: BigInt(amount),
-        meta: meta ?? undefined,
+        meta: (meta as Prisma.InputJsonValue) ?? undefined,
       },
     });
   });
@@ -103,11 +103,7 @@ export async function resetQuota(userId: string, type: QuotaType): Promise<void>
 /**
  * Admin: set quota limit for a user. Creates the record if it doesn't exist.
  */
-export async function setQuotaLimit(
-  userId: string,
-  type: QuotaType,
-  limit: bigint,
-): Promise<void> {
+export async function setQuotaLimit(userId: string, type: QuotaType, limit: bigint): Promise<void> {
   await db.quota.upsert({
     where: { userId_type: { userId, type } },
     update: { limit },

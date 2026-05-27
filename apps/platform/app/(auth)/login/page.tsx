@@ -1,10 +1,10 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { Suspense, useState } from 'react';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -39,7 +39,19 @@ export default function LoginPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <div className="flex size-8 items-center justify-center rounded-md bg-[oklch(0.555_0.185_28)]">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
             </div>
             <span className="text-[15px] font-semibold tracking-tight">open-slide</span>
           </div>
@@ -47,16 +59,15 @@ export default function LoginPage() {
 
         <div className="space-y-5">
           <blockquote className="text-[22px] font-medium leading-snug tracking-tight text-white/90">
-            用对话创建演示文稿，<br/>让 AI 处理设计细节。
+            用对话创建演示文稿，
+            <br />让 AI 处理设计细节。
           </blockquote>
           <p className="text-[13px] leading-relaxed text-white/50">
             基于 React 组件的 1920×1080 画布，支持多格式导出、资产管理和实时协作编辑。
           </p>
         </div>
 
-        <p className="text-[11px] text-white/30">
-          open-slide platform
-        </p>
+        <p className="text-[11px] text-white/30">open-slide platform</p>
       </div>
 
       {/* Right form panel */}
@@ -79,8 +90,14 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[oklch(0.35_0.012_60)]">邮箱</label>
+              <label
+                htmlFor="login-email"
+                className="text-[12px] font-medium text-[oklch(0.35_0.012_60)]"
+              >
+                邮箱
+              </label>
               <input
+                id="login-email"
                 type="email"
                 placeholder="name@example.com"
                 value={email}
@@ -91,8 +108,14 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[oklch(0.35_0.012_60)]">密码</label>
+              <label
+                htmlFor="login-password"
+                className="text-[12px] font-medium text-[oklch(0.35_0.012_60)]"
+              >
+                密码
+              </label>
               <input
+                id="login-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
@@ -113,12 +136,23 @@ export default function LoginPage() {
 
           <p className="text-center text-[12.5px] text-[oklch(0.485_0.012_60)]">
             没有账号？{' '}
-            <a href="/register" className="font-medium text-[oklch(0.2_0.012_60)] underline underline-offset-2 hover:text-[oklch(0.555_0.185_28)]">
+            <a
+              href="/register"
+              className="font-medium text-[oklch(0.2_0.012_60)] underline underline-offset-2 hover:text-[oklch(0.555_0.185_28)]"
+            >
               注册
             </a>
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

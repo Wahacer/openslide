@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { getUploadUrl, assetKey } from '@/lib/storage';
+import { assetKey, getUploadUrl } from '@/lib/storage';
 
 export async function POST(request: Request) {
   const session = await auth();

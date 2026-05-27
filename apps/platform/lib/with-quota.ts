@@ -1,7 +1,7 @@
+import type { QuotaType } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { checkQuota, consumeQuota } from './quota';
-import type { QuotaType } from '@prisma/client';
 
 type RouteHandler = (request: Request, context?: unknown) => Promise<NextResponse>;
 
