@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ChatPanel } from '../../../components/chat-panel';
 
 type SlideDetail = {
   id: string;
@@ -16,6 +17,13 @@ type SlideDetail = {
 
 type ApplyStatus = 'idle' | 'loading' | 'success' | 'error';
 
+type ConversationSummary = {
+  id: string;
+  title: string | null;
+  updatedAt: string;
+  _count: { messages: number };
+};
+
 export default function SlideDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -23,6 +31,9 @@ export default function SlideDetailPage() {
   const [loading, setLoading] = useState(true);
   const [applyStatus, setApplyStatus] = useState<ApplyStatus>('idle');
   const [applyMessage, setApplyMessage] = useState('');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>();
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
 
   useEffect(() => {
     fetch(`/api/slides/${id}`)
@@ -32,6 +43,13 @@ export default function SlideDetailPage() {
         setLoading(false);
       });
   }, [id]);
+
+  useEffect(() => {
+    if (!chatOpen) return;
+    fetch(`/api/conversations?slideId=${id}`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setConversations);
+  }, [chatOpen, id]);
 
   async function handleApplyComments() {
     setApplyStatus('loading');
@@ -100,6 +118,13 @@ export default function SlideDetailPage() {
         >
           {applyStatus === 'loading' ? '应用中…' : `应用所有评论 (${commentCount})`}
         </button>
+        <button
+          type="button"
+          onClick={() => setChatOpen(!chatOpen)}
+          className="rounded-md border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          {chatOpen ? '关闭对话' : 'AI 对话编辑'}
+        </button>
       </div>
 
       {applyMessage && (
@@ -129,6 +154,51 @@ export default function SlideDetailPage() {
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {chatOpen && (
+        <div className="mt-6 rounded-lg border border-neutral-200">
+          {conversations.length > 0 && (
+            <div className="flex items-center gap-2 border-b border-neutral-100 px-4 py-2">
+              <span className="text-xs text-neutral-500">历史对话:</span>
+              <button
+                type="button"
+                onClick={() => setConversationId(undefined)}
+                className={`rounded px-2 py-0.5 text-xs ${
+                  !conversationId
+                    ? 'bg-neutral-800 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+              >
+                新对话
+              </button>
+              {conversations.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setConversationId(c.id)}
+                  className={`max-w-32 truncate rounded px-2 py-0.5 text-xs ${
+                    conversationId === c.id
+                      ? 'bg-neutral-800 text-white'
+                      : 'text-neutral-600 hover:bg-neutral-100'
+                  }`}
+                >
+                  {c.title || '未命名'}
+                </button>
+              ))}
+            </div>
+          )}
+          <ChatPanel
+            slideId={id}
+            conversationId={conversationId}
+            onConversationCreated={(newId) => {
+              setConversationId(newId);
+              fetch(`/api/conversations?slideId=${id}`)
+                .then((res) => (res.ok ? res.json() : []))
+                .then(setConversations);
+            }}
+          />
         </div>
       )}
     </div>

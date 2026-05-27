@@ -35,6 +35,7 @@ model User {
   assets        Asset[]
   quotas        Quota[]
   usageLogs     UsageLog[]
+  conversations Conversation[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 }
@@ -132,4 +133,31 @@ model UsageLog {
   createdAt DateTime  @default(now())
 
   @@index([userId, createdAt])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slideId   String?
+  title     String?
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([slideId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String
+  model          String?
+  tokensUsed     Int?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
 }

@@ -53,21 +53,21 @@
 
 ## Phase 3 — Chat 式 PPT 编辑 & 创建（预计 3-4 周）
 
-- [ ] Chat API 设计（WebSocket / SSE 流式输出）
-- [ ] AI Service Layer 抽象（支持多模型切换）
-  - [ ] Claude API Provider
-  - [ ] OpenAI API Provider（可选）
+- [x] Chat API 设计（WebSocket / SSE 流式输出）
+- [x] AI Service Layer 抽象（支持多模型切换）
+  - [x] Claude API Provider
+  - [x] OpenAI API Provider（可选）
   - [ ] 图片生成 Provider（DALL-E / Flux / GPT-Image）
 - [ ] 复用现有 EditOp 体系（LLM 输出结构化指令，非原始代码）
   - [ ] set-style / set-text / set-attr-asset / replace-placeholder-with-image
   - [ ] 新增：insert-page / delete-page / reorder-page 指令
-- [ ] Slide 源码 + 资产列表作为 context 传入 LLM
+- [x] Slide 源码 + 资产列表作为 context 传入 LLM
 - [ ] LLM 输出 → EditOp 解析 → AST 编辑 → 源码更新 pipeline
-- [ ] 对话历史持久化（支持多轮修改）
-- [ ] 前端 Chat 面板 UI（右侧抽屉/面板）
-- [ ] 流式返回 + 实时预览
+- [x] 对话历史持久化（支持多轮修改）
+- [x] 前端 Chat 面板 UI（右侧抽屉/面板）
+- [x] 流式返回 + 实时预览
 - [ ] 快捷指令支持（/新建、/修改颜色、/添加页面）
-- [ ] Token 用量计量 & 扣费集成
+- [x] Token 用量计量 & 扣费集成
 
 ---
 
