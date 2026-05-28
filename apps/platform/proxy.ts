@@ -12,6 +12,10 @@ export default async function proxy(request: NextRequest) {
   }
 
   if (publicPaths.some((p) => pathname.startsWith(p))) {
+    const session = await auth();
+    if (session && (pathname === '/login' || pathname === '/register')) {
+      return NextResponse.redirect(new URL('/slides', request.url));
+    }
     return NextResponse.next();
   }
 
