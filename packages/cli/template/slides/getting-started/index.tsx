@@ -428,7 +428,7 @@ const Cover: Page = () => (
             borderRadius: 999,
           }}
         >
-          v1
+          V4
         </div>
       </div>
 

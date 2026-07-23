@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "id": "f-16ec86a8",
+      "name": "甄优健康",
+      "icon": {
+        "type": "color",
+        "value": "#c0392b"
+      }
+    },
+    {
+      "id": "f-b821dff3",
+      "name": "文旅",
+      "icon": {
+        "type": "color",
+        "value": "#b8743e"
+      }
+    }
+  ],
+  "assignments": {
+    "binhai-digital-culture": "f-b821dff3",
+    "zhiyun-health": "f-16ec86a8",
+    "shanqiu-liankang": "f-16ec86a8",
+    "zhenyou-health": "f-16ec86a8"
+  }
+}
