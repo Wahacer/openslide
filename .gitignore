@@ -1,7 +1,21 @@
 node_modules
 dist
+
+# --- common ignores ---
+# macOS
 .DS_Store
-*.log
-.vite
-*.tsbuildinfo
-.turbo
+
+# Windows
+Thumbs.db
+
+# Editors
+*.swp
+.idea/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
