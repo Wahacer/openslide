@@ -19,3 +19,9 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Project-specific tooling / cache
+.codex/
+.playwright-mcp/
+.sisyphus/
+.turbo/
